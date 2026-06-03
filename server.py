@@ -29,6 +29,79 @@ WEAPONS = [
     ("Carbine","Weapon","Legendary","A-Coins",None),("Disruptor","Weapon","Legendary","A-Coins",None),("Particle Beam","Weapon","Legendary","A-Coins",None),("Repeater","Weapon","Legendary","A-Coins",None),("Railgun","Weapon","Legendary","A-Coins",None),("Viper","Weapon","Legendary","A-Coins",None),("Storm Rack","Weapon","Legendary","A-Coins",None),("Graviton Beam","Weapon","Legendary","A-Coins",None),("Howler","Weapon","Legendary","A-Coins",None),("EM Rifle","Weapon","Legendary","A-Coins",None),("Overdriver","Weapon","Legendary","A-Coins",None),("Blast RPG","Weapon","Epic","A-Coins",None),("Revoker","Weapon","Legendary","A-Coins",None),("Tetra Rifle","Weapon","Legendary","A-Coins",None),("Disc Launcher","Weapon","Legendary","A-Coins",None),("Savant","Weapon","Legendary","A-Coins",None),("Strike Rocket","Weapon","Legendary","A-Coins",None),("Pod Gun","Weapon","Legendary","A-Coins",None),("Minigun","Weapon","Legendary","A-Coins",None),("Chain Gun","Weapon","Legendary","A-Coins",None),("Hellfire","Weapon","Legendary","A-Coins",None)
 ]
 
+
+# Costs below are seeded from the public Gear Hub cost table.
+# Some new gear is marked as "$" on the wiki, so those items are stored as In-App Purchase with no numeric default_cost.
+GEAR_HUB_COSTS = [
+    # Mechs
+    ("Paragon","Mech","Common","Credits",0),("Lancer","Mech","Common","Credits",400),
+    ("Puma","Mech","Uncommon","A-Coins",45),("Slingshot","Mech","Uncommon","Credits",4700),("Juggernaut","Mech","Uncommon","A-Coins",45),("M.D.","Mech","Uncommon","Credits",4700),
+    ("Guardian","Mech","Rare","A-Coins",420),("Shadow","Mech","Rare","A-Coins",420),("Ares","Mech","Rare","Credits",42200),
+    ("Stalker","Mech","Rare","A-Coins",420),("Tengu","Mech","Rare","A-Coins",420),("Arachnos","Mech","Rare","Credits",42200),
+    ("Aegis","Mech","Epic","A-Coins",1865),("Cheetah","Mech","Epic","A-Coins",1305),("Redeemer","Mech","Epic","A-Coins",1865),("Zephyr","Mech","Epic","Credits",186600),
+    ("Killshot","Mech","Epic","A-Coins",1865),("Orion","Mech","Epic","A-Coins",1865),("Panther","Mech","Epic","A-Coins",2425),("Sentinel","Mech","Epic","Credits",130600),
+    ("Brickhouse","Mech","Legendary","Credits",937500),("Eclipse","Mech","Legendary","A-Coins",9375),("Redox","Mech","Legendary","A-Coins",9375),("Scorpius","Mech","Legendary","A-Coins",9375),("Surge","Mech","Legendary","A-Coins",9375),
+    ("Bastion","Mech","Legendary","A-Coins",9375),("Gatecrasher","Mech","Legendary","A-Coins",9375),("Hemlock","Mech","Legendary","Credits",937500),("Lacewing","Mech","Legendary","A-Coins",9375),("Nomad","Mech","Legendary","A-Coins",9375),("Onyx","Mech","Legendary","A-Coins",9375),("Solis","Mech","Legendary","Credits",937500),("Vortex","Mech","Legendary","A-Coins",9375),
+    ("Blockhorn","Mech","Legendary","A-Coins",9375),("Mimicker","Mech","Legendary","Credits",937500),("Seeker","Mech","Legendary","A-Coins",9375),("Silverthorn","Mech","Legendary","A-Coins",9375),
+    ("Blizzfrost","Mech","Legendary","In-App Purchase",None),("Citadel","Mech","Legendary","In-App Purchase",None),("Deathwalker","Mech","Legendary","In-App Purchase",None),("Dreadnought","Mech","Legendary","In-App Purchase",None),("Outlaw","Mech","Legendary","In-App Purchase",None),("Parasite","Mech","Legendary","In-App Purchase",None),("Salvor","Mech","Legendary","In-App Purchase",None),("Volti","Mech","Legendary","In-App Purchase",None),
+
+    # Common / early weapons and variants
+    ("Autocannon 2","Weapon","Common","Credits",50),("Autocannon 4","Weapon","Common","Credits",0),
+    ("RPG 2","Weapon","Common","Credits",50),("RPG 4","Weapon","Common","Credits",100),("RPG 6","Weapon","Common","Credits",150),
+    ("Thermal Lance 2","Weapon","Common","Credits",50),("Thermal Lance 4","Weapon","Common","Credits",100),("Thermal Lance 6","Weapon","Common","Credits",150),
+    ("Plasma Cannon 2","Weapon","Uncommon","A-Coins",30),("Plasma Cannon 4","Weapon","Uncommon","Credits",3450),("Plasma Cannon 6","Weapon","Uncommon","Credits",3600),
+    ("Shotgun 2","Weapon","Uncommon","Credits",3150),("Shotgun 4","Weapon","Uncommon","Credits",3450),("Shotgun 8","Weapon","Uncommon","A-Coins",35),
+    ("Longarm 8","Weapon","Uncommon","Credits",3700),("Longarm 10","Weapon","Uncommon","Credits",3800),("Longarm 12","Weapon","Uncommon","A-Coins",40),
+    ("Gauss Rifle 4","Weapon","Rare","A-Coins",205),("Gauss Rifle 6","Weapon","Rare","A-Coins",220),("Gauss Rifle 10","Weapon","Rare","A-Coins",235),
+    ("Javelin Rack 4","Weapon","Rare","Credits",20300),("Javelin Rack 6","Weapon","Rare","A-Coins",220),("Javelin Rack 8","Weapon","Rare","A-Coins",230),("Javelin Rack 12","Weapon","Rare","A-Coins",245),("Javelin Rack 16","Weapon","Rare","A-Coins",255),
+    ("Pulse Cannon 4","Weapon","Rare","A-Coins",205),("Pulse Cannon 6","Weapon","Rare","Credits",21850),("Pulse Cannon 8","Weapon","Rare","Credits",22850),
+    ("Rocket Mortar 8","Weapon","Rare","A-Coins",230),("Rocket Mortar 10","Weapon","Rare","Credits",23700),("Rocket Mortar 12","Weapon","Rare","A-Coins",245),
+    ("Fragment Gun 6","Weapon","Rare","Credits",21850),("Fragment Gun 8","Weapon","Rare","Credits",22850),("Fragment Gun 10","Weapon","Rare","A-Coins",235),("Fragment Gun 12","Weapon","Rare","Credits",24400),("Fragment Gun 14","Weapon","Rare","A-Coins",250),
+
+    # Epic weapons
+    ("Arc Torrent 6","Weapon","Epic","Credits",77250),("Arc Torrent 10","Weapon","Epic","A-Coins",870),("Arc Torrent 12","Weapon","Epic","A-Coins",910),
+    ("Cryo Launcher 6","Weapon","Epic","Credits",66550),("Cryo Launcher 8","Weapon","Epic","A-Coins",705),("Cryo Launcher 10","Weapon","Epic","Credits",73450),("Cryo Launcher 12","Weapon","Epic","A-Coins",760),("Cryo Launcher 16","Weapon","Epic","Credits",79950),
+    ("Ember Gun 6","Weapon","Epic","Credits",87900),("Ember Gun 8","Weapon","Epic","Credits",95000),("Ember Gun 10","Weapon","Epic","A-Coins",1005),("Ember Gun 12","Weapon","Epic","A-Coins",1055),("Ember Gun 16","Weapon","Epic","A-Coins",1130),
+    ("Fusion Cannon 6","Weapon","Epic","A-Coins",665),("Fusion Cannon 8","Weapon","Epic","A-Coins",705),("Fusion Cannon 10","Weapon","Epic","Credits",73450),("Fusion Cannon 12","Weapon","Epic","A-Coins",760),("Fusion Cannon 16","Weapon","Epic","Credits",79950),
+    ("Helix Rack 6","Weapon","Epic","A-Coins",880),("Helix Rack 8","Weapon","Epic","Credits",95000),("Helix Rack 10","Weapon","Epic","A-Coins",1005),("Helix Rack 12","Weapon","Epic","A-Coins",1055),("Helix Rack 16","Weapon","Epic","Credits",112800),
+    ("Missile Rack 6","Weapon","Epic","Credits",77250),("Missile Rack 8","Weapon","Epic","A-Coins",825),("Missile Rack 12","Weapon","Epic","A-Coins",910),("Missile Rack 16","Weapon","Epic","A-Coins",965),
+    ("Nade Launcher 6","Weapon","Epic","A-Coins",770),("Nade Launcher 8","Weapon","Epic","A-Coins",825),("Nade Launcher 10","Weapon","Epic","Credits",87100),("Nade Launcher 12","Weapon","Epic","A-Coins",910),("Nade Launcher 16","Weapon","Epic","A-Coins",965),
+    ("Quantum Gun 6","Weapon","Epic","Credits",77250),("Quantum Gun 8","Weapon","Epic","Credits",82700),("Quantum Gun 10","Weapon","Epic","Credits",87100),("Quantum Gun 12","Weapon","Epic","A-Coins",910),("Quantum Gun 16","Weapon","Epic","A-Coins",965),
+    ("Stasis Beam 8","Weapon","Epic","Credits",70400),("Stasis Beam 12","Weapon","Epic","A-Coins",760),("Stasis Beam 16","Weapon","Epic","Credits",79950),
+    ("Voltaic RPG 8","Weapon","Epic","Credits",70400),("Voltaic RPG 14","Weapon","Epic","Credits",78050),("Voltaic RPG 16","Weapon","Epic","A-Coins",800),
+    ("Fuse Mortar 8","Weapon","Epic","A-Coins",825),("Fuse Mortar 10","Weapon","Epic","Credits",87000),("Fuse Mortar 12","Weapon","Epic","A-Coins",910),
+
+    # Legendary weapon variants listed in Gear Hub table
+    ("Berserker 6","Weapon","Legendary","Credits",600000),("Berserker 8","Weapon","Legendary","A-Coins",8275),("Berserker 10","Weapon","Legendary","Credits",712500),("Berserker 12","Weapon","Legendary","A-Coins",7500),("Berserker 16","Weapon","Legendary","Credits",827500),
+    ("Blast RPG 6","Weapon","Legendary","A-Coins",6000),("Blast RPG 8","Weapon","Legendary","Credits",700000),("Blast RPG 10","Weapon","Legendary","A-Coins",7125),("Blast RPG 12","Weapon","Legendary","A-Coins",7500),("Blast RPG 16","Weapon","Legendary","Credits",827500),
+    ("Carbine 8","Weapon","Legendary","A-Coins",8275),("Carbine 10","Weapon","Legendary","A-Coins",7125),("Carbine 12","Weapon","Legendary","A-Coins",7500),
+    ("Chain Gun 6","Weapon","Legendary","Credits",750000),("Chain Gun 8","Weapon","Legendary","A-Coins",8275),("Chain Gun 10","Weapon","Legendary","Credits",712500),("Chain Gun 12","Weapon","Legendary","A-Coins",7500),("Chain Gun 16","Weapon","Legendary","A-Coins",8275),
+    ("Disc Launcher 8","Weapon","Legendary","Credits",826750),("Disc Launcher 12","Weapon","Legendary","A-Coins",7500),("Disc Launcher 16","Weapon","Legendary","A-Coins",8275),
+    ("Disruptor 6","Weapon","Legendary","Credits",755000),("Disruptor 8","Weapon","Legendary","A-Coins",8275),("Disruptor 10","Weapon","Legendary","A-Coins",7125),("Disruptor 12","Weapon","Legendary","Credits",755000),("Disruptor 16","Weapon","Legendary","Credits",826750),
+    ("Dreadshot 6","Weapon","Legendary","Credits",700000),("Dreadshot 8","Weapon","Legendary","Credits",800000),("Dreadshot 10","Weapon","Legendary","A-Coins",7125),("Dreadshot 12","Weapon","Legendary","A-Coins",7500),("Dreadshot 16","Weapon","Legendary","A-Coins",8275),
+    ("EM Rifle 6","Weapon","Legendary","A-Coins",7500),("EM Rifle 8","Weapon","Legendary","A-Coins",8275),("EM Rifle 10","Weapon","Legendary","A-Coins",7125),("EM Rifle 12","Weapon","Legendary","A-Coins",7500),("EM Rifle 16","Weapon","Legendary","A-Coins",8275),
+    ("Gemini 6","Weapon","Legendary","Credits",600000),("Gemini 8","Weapon","Legendary","A-Coins",8275),("Gemini 10","Weapon","Legendary","Credits",712500),("Gemini 12","Weapon","Legendary","A-Coins",7500),("Gemini 16","Weapon","Legendary","A-Coins",8275),
+    ("Graviton Beam 10","Weapon","Legendary","Credits",711500),("Graviton Beam 12","Weapon","Legendary","A-Coins",7500),("Graviton Beam 16","Weapon","Legendary","A-Coins",8275),
+    ("Hellfire 6","Weapon","Legendary","Credits",600000),("Hellfire 8","Weapon","Legendary","A-Coins",8275),("Hellfire 10","Weapon","Legendary","Credits",700000),("Hellfire 12","Weapon","Legendary","A-Coins",7500),("Hellfire 16","Weapon","Legendary","A-Coins",8275),
+    ("Hornet 6","Weapon","Legendary","Credits",600000),("Hornet 8","Weapon","Legendary","A-Coins",8000),("Hornet 10","Weapon","Legendary","Credits",700000),("Hornet 12","Weapon","Legendary","Credits",750000),("Hornet 16","Weapon","Legendary","A-Coins",8275),
+    ("Howler 6","Weapon","Legendary","A-Coins",6000),("Howler 8","Weapon","Legendary","Credits",827500),("Howler 10","Weapon","Legendary","A-Coins",6750),("Howler 12","Weapon","Legendary","A-Coins",7500),("Howler 16","Weapon","Legendary","Credits",827500),
+    ("Minigun 6","Weapon","Legendary","A-Coins",7500),("Minigun 8","Weapon","Legendary","A-Coins",8275),("Minigun 10","Weapon","Legendary","A-Coins",7125),("Minigun 12","Weapon","Legendary","A-Coins",7500),("Minigun 16","Weapon","Legendary","A-Coins",8275),
+    ("Oracle 6","Weapon","Legendary","Credits",600000),("Oracle 8","Weapon","Legendary","A-Coins",8000),("Oracle 10","Weapon","Legendary","Credits",700000),("Oracle 12","Weapon","Legendary","Credits",750000),("Oracle 16","Weapon","Legendary","A-Coins",8275),
+    ("Overdriver 6","Weapon","Legendary","A-Coins",6000),("Overdriver 8","Weapon","Legendary","Credits",827500),("Overdriver 10","Weapon","Legendary","Credits",712500),("Overdriver 12","Weapon","Legendary","A-Coins",7500),("Overdriver 16","Weapon","Legendary","A-Coins",8275),
+    ("Particle Beam 6","Weapon","Legendary","Credits",600000),("Particle Beam 8","Weapon","Legendary","A-Coins",8275),("Particle Beam 10","Weapon","Legendary","Credits",712500),("Particle Beam 12","Weapon","Legendary","A-Coins",7500),("Particle Beam 16","Weapon","Legendary","A-Coins",8275),
+    ("Pod Gun 6","Weapon","Legendary","A-Coins",6250),("Pod Gun 8","Weapon","Legendary","Credits",827500),("Pod Gun 10","Weapon","Legendary","Credits",712500),("Pod Gun 12","Weapon","Legendary","A-Coins",7500),("Pod Gun 16","Weapon","Legendary","A-Coins",8275),
+    ("Railgun 8","Weapon","Legendary","Credits",827500),("Railgun 12","Weapon","Legendary","A-Coins",7500),("Railgun 16","Weapon","Legendary","A-Coins",8275),
+    ("Reaver 6","Weapon","Legendary","A-Coins",6000),("Reaver 8","Weapon","Legendary","Credits",650000),("Reaver 10","Weapon","Legendary","Credits",700000),("Reaver 12","Weapon","Legendary","A-Coins",7000),("Reaver 16","Weapon","Legendary","Credits",800000),
+    ("Repeater 6","Weapon","Legendary","Credits",712500),("Repeater 8","Weapon","Legendary","A-Coins",8275),("Repeater 10","Weapon","Legendary","Credits",675000),("Repeater 12","Weapon","Legendary","A-Coins",7500),("Repeater 16","Weapon","Legendary","A-Coins",8275),
+    ("Revoker 6","Weapon","Legendary","Credits",600000),("Revoker 8","Weapon","Legendary","A-Coins",7000),("Revoker 10","Weapon","Legendary","Credits",700000),("Revoker 12","Weapon","Legendary","A-Coins",8275),("Revoker 16","Weapon","Legendary","A-Coins",8275),
+    ("Savant 6","Weapon","Legendary","Credits",600000),("Savant 8","Weapon","Legendary","A-Coins",8275),("Savant 10","Weapon","Legendary","A-Coins",7125),("Savant 12","Weapon","Legendary","A-Coins",7500),("Savant 16","Weapon","Legendary","Credits",827500),
+    ("Storm Rack 6","Weapon","Legendary","Credits",675000),("Storm Rack 8","Weapon","Legendary","A-Coins",8275),("Storm Rack 10","Weapon","Legendary","Credits",712500),("Storm Rack 12","Weapon","Legendary","A-Coins",7500),("Storm Rack 16","Weapon","Legendary","Credits",827500),
+    ("Strike Rocket 6","Weapon","Legendary","Credits",600000),("Strike Rocket 8","Weapon","Legendary","Credits",750000),("Strike Rocket 10","Weapon","Legendary","Credits",675000),("Strike Rocket 12","Weapon","Legendary","A-Coins",7500),("Strike Rocket 16","Weapon","Legendary","A-Coins",8275),
+    ("Tetra Rifle 6","Weapon","Legendary","Credits",600000),("Tetra Rifle 8","Weapon","Legendary","Credits",800000),("Tetra Rifle 10","Weapon","Legendary","Credits",700000),("Tetra Rifle 12","Weapon","Legendary","A-Coins",7500),("Tetra Rifle 16","Weapon","Legendary","A-Coins",8275),
+    ("Viper 6","Weapon","Legendary","Credits",600000),("Viper 8","Weapon","Legendary","Credits",827500),("Viper 10","Weapon","Legendary","A-Coins",7125),("Viper 12","Weapon","Legendary","A-Coins",7500),("Viper 16","Weapon","Legendary","A-Coins",8275),
+    ("Burrow Beam","Weapon","Legendary","In-App Purchase",None),("Charge Rocket","Weapon","Legendary","In-App Purchase",None),("Compound Beam","Weapon","Legendary","In-App Purchase",None),("Continuum","Weapon","Legendary","In-App Purchase",None),("Quasher","Weapon","Legendary","In-App Purchase",None),("Suppressor","Weapon","Legendary","In-App Purchase",None),
+]
+
 def now_iso():
     return datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
@@ -127,6 +200,18 @@ def init_db():
     source = 'Seeded from Mech Arena wiki lists; costs can be edited by admin.'
     for row in MECHS + WEAPONS:
         cur.execute("INSERT OR IGNORE INTO items(name,category,rarity,currency,default_cost,source,updated_at) VALUES(?,?,?,?,?,?,?)", (*row, source, now_iso()))
+
+    gear_source = 'Seeded from Mech Arena Wiki Gear Hub cost table; costs can change in-game and can be edited by admin.'
+    for name, category, rarity, currency, default_cost in GEAR_HUB_COSTS:
+        cur.execute('''INSERT INTO items(name,category,rarity,currency,default_cost,source,updated_at)
+                       VALUES(?,?,?,?,?,?,?)
+                       ON CONFLICT(name,category) DO UPDATE SET
+                         rarity=excluded.rarity,
+                         currency=excluded.currency,
+                         default_cost=excluded.default_cost,
+                         source=excluded.source,
+                         updated_at=excluded.updated_at''',
+                    (name, category, rarity, currency, default_cost, gear_source, now_iso()))
     con.commit(); con.close()
 
 def rowdict(row):
