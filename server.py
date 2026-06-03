@@ -382,7 +382,13 @@ def daily_need(goal):
 
 if __name__ == '__main__':
     init_db()
-    host='localhost'; port=8000
-    print('Advance Arena running at http://localhost:8000')
+
+    # Render gives your app a PORT environment variable.
+    # The server must listen on 0.0.0.0, not localhost, otherwise Render cannot open it.
+    host = '0.0.0.0'
+    port = int(os.environ.get('PORT', 8000))
+
+    print(f'Advance Arena running on http://{host}:{port}')
     print('Default admin: username admin / password admin123')
-    ThreadingHTTPServer((host,port), Handler).serve_forever()
+
+    ThreadingHTTPServer((host, port), Handler).serve_forever()
