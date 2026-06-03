@@ -1,0 +1,388 @@
+#!/usr/bin/env python3
+"""
+Advance Arena Full Stack
+- Python standard library only
+- SQLite database
+- Login/signup, online account saving, admin panel, item database, goals, calendar, rewards
+Run: python server.py
+Open: http://localhost:8000
+"""
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
+from pathlib import Path
+import sqlite3, json, secrets, hashlib, hmac, os, mimetypes, datetime, re
+
+BASE_DIR = Path(__file__).resolve().parent
+PUBLIC_DIR = BASE_DIR / "public"
+DB_PATH = BASE_DIR / "advance_arena.db"
+SESSION_DAYS = 30
+
+MECHS = [
+    ("Paragon","Mech","Common","A-Coins",None),("Lancer","Mech","Common","A-Coins",None),
+    ("Juggernaut","Mech","Uncommon","A-Coins",None),("M.D.","Mech","Uncommon","A-Coins",None),("Puma","Mech","Uncommon","A-Coins",None),("Slingshot","Mech","Uncommon","A-Coins",None),
+    ("Guardian","Mech","Rare","A-Coins",None),("Shadow","Mech","Rare","A-Coins",None),("Ares","Mech","Rare","A-Coins",None),("Arachnos","Mech","Rare","A-Coins",None),("Stalker","Mech","Rare","A-Coins",None),("Tengu","Mech","Rare","A-Coins",None),
+    ("Panther","Mech","Epic","A-Coins",None),("Killshot","Mech","Epic","A-Coins",None),("Zephyr","Mech","Epic","A-Coins",None),("Cheetah","Mech","Epic","A-Coins",None),("Aegis","Mech","Epic","A-Coins",None),("Orion","Mech","Epic","A-Coins",None),("Redeemer","Mech","Epic","A-Coins",None),("Sentinel","Mech","Epic","A-Coins",None),
+    ("Brickhouse","Mech","Legendary","A-Coins",None),("Redox","Mech","Legendary","A-Coins",None),("Surge","Mech","Legendary","A-Coins",None),("Gatecrasher","Mech","Legendary","A-Coins",None),("Bastion","Mech","Legendary","A-Coins",None),("Onyx","Mech","Legendary","A-Coins",None),("Eclipse","Mech","Legendary","A-Coins",None),("Scorpius","Mech","Legendary","A-Coins",None),("Nomad","Mech","Legendary","A-Coins",None),("Hemlock","Mech","Legendary","A-Coins",None),("Vortex","Mech","Legendary","A-Coins",None),("Seeker","Mech","Legendary","A-Coins",None),("Solis","Mech","Legendary","A-Coins",None),("Lacewing","Mech","Legendary","A-Coins",None),("Blockhorn","Mech","Legendary","A-Coins",None),("Mimicker","Mech","Legendary","A-Coins",None),("Deathwalker","Mech","Legendary","A-Coins",None),("Outlaw","Mech","Legendary","A-Coins",None),("Salvor","Mech","Legendary","A-Coins",None),("Dreadnought","Mech","Legendary","A-Coins",None),("Parasite","Mech","Legendary","A-Coins",None),("Volti","Mech","Legendary","A-Coins",None),("Silverthorn","Mech","Legendary","A-Coins",None),("Blizzfrost","Mech","Legendary","A-Coins",None),("Citadel","Mech","Legendary","A-Coins",None)
+]
+WEAPONS = [
+    ("Autocannon","Weapon","Common","Credits",None),("Thermal Lance","Weapon","Common","Credits",None),("Shotgun","Weapon","Common","Credits",None),("RPG","Weapon","Common","Credits",None),("Javelin Rack","Weapon","Common","Credits",None),
+    ("Carbine","Weapon","Legendary","A-Coins",None),("Disruptor","Weapon","Legendary","A-Coins",None),("Particle Beam","Weapon","Legendary","A-Coins",None),("Repeater","Weapon","Legendary","A-Coins",None),("Railgun","Weapon","Legendary","A-Coins",None),("Viper","Weapon","Legendary","A-Coins",None),("Storm Rack","Weapon","Legendary","A-Coins",None),("Graviton Beam","Weapon","Legendary","A-Coins",None),("Howler","Weapon","Legendary","A-Coins",None),("EM Rifle","Weapon","Legendary","A-Coins",None),("Overdriver","Weapon","Legendary","A-Coins",None),("Blast RPG","Weapon","Epic","A-Coins",None),("Revoker","Weapon","Legendary","A-Coins",None),("Tetra Rifle","Weapon","Legendary","A-Coins",None),("Disc Launcher","Weapon","Legendary","A-Coins",None),("Savant","Weapon","Legendary","A-Coins",None),("Strike Rocket","Weapon","Legendary","A-Coins",None),("Pod Gun","Weapon","Legendary","A-Coins",None),("Minigun","Weapon","Legendary","A-Coins",None),("Chain Gun","Weapon","Legendary","A-Coins",None),("Hellfire","Weapon","Legendary","A-Coins",None)
+]
+
+def now_iso():
+    return datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+def db():
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    return con
+
+def hash_password(password, salt=None):
+    if salt is None:
+        salt = secrets.token_hex(16)
+    dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 120000)
+    return f"{salt}${dk.hex()}"
+
+def verify_password(password, stored):
+    try:
+        salt, _ = stored.split('$',1)
+        return hmac.compare_digest(hash_password(password, salt), stored)
+    except Exception:
+        return False
+
+def init_db():
+    con = db(); cur = con.cursor()
+    cur.executescript('''
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      is_admin INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      rarity TEXT,
+      currency TEXT,
+      default_cost INTEGER,
+      source TEXT,
+      updated_at TEXT NOT NULL,
+      UNIQUE(name, category)
+    );
+    CREATE TABLE IF NOT EXISTS goals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      item_id INTEGER,
+      item_name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      goal_type TEXT NOT NULL,
+      priority TEXT DEFAULT 'Medium',
+      currency TEXT NOT NULL,
+      target INTEGER NOT NULL,
+      current INTEGER NOT NULL DEFAULT 0,
+      deadline TEXT,
+      completed INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'active',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(item_id) REFERENCES items(id) ON DELETE SET NULL
+    );
+    CREATE TABLE IF NOT EXISTS progress_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      goal_id INTEGER NOT NULL,
+      amount INTEGER NOT NULL,
+      note TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(goal_id) REFERENCES goals(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS rewards (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      login_claimed INTEGER DEFAULT 0,
+      ads_watched INTEGER DEFAULT 0,
+      events_played INTEGER DEFAULT 0,
+      tournament_done INTEGER DEFAULT 0,
+      updated_at TEXT NOT NULL,
+      UNIQUE(user_id, date),
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    ''')
+    # admin
+    cur.execute("SELECT id FROM users WHERE username='admin'")
+    if not cur.fetchone():
+        cur.execute("INSERT INTO users(username,email,password_hash,is_admin,created_at) VALUES(?,?,?,?,?)",(
+            'admin','admin@advancearena.local',hash_password('admin123'),1,now_iso()))
+    source = 'Seeded from Mech Arena wiki lists; costs can be edited by admin.'
+    for row in MECHS + WEAPONS:
+        cur.execute("INSERT OR IGNORE INTO items(name,category,rarity,currency,default_cost,source,updated_at) VALUES(?,?,?,?,?,?,?)", (*row, source, now_iso()))
+    con.commit(); con.close()
+
+def rowdict(row):
+    return dict(row) if row else None
+
+def rowsdict(rows):
+    return [dict(r) for r in rows]
+
+class Handler(BaseHTTPRequestHandler):
+    server_version = "AdvanceArena/1.0"
+
+    def end_headers(self):
+        self.send_header('X-Content-Type-Options','nosniff')
+        super().end_headers()
+
+    def log_message(self, fmt, *args):
+        print("%s - - [%s] %s" % (self.address_string(), self.log_date_time_string(), fmt%args))
+
+    def read_json(self):
+        length = int(self.headers.get('Content-Length','0'))
+        if length == 0: return {}
+        raw = self.rfile.read(length).decode('utf-8')
+        try: return json.loads(raw)
+        except Exception: raise ValueError('Invalid JSON')
+
+    def send_json(self, obj, status=200, cookie=None):
+        body = json.dumps(obj, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type','application/json; charset=utf-8')
+        self.send_header('Content-Length',str(len(body)))
+        if cookie: self.send_header('Set-Cookie', cookie)
+        self.end_headers(); self.wfile.write(body)
+
+    def cookie_token(self):
+        cookie = self.headers.get('Cookie','')
+        for part in cookie.split(';'):
+            if part.strip().startswith('aa_session='):
+                return part.strip().split('=',1)[1]
+        return None
+
+    def current_user(self):
+        token = self.cookie_token()
+        if not token: return None
+        con = db(); cur = con.cursor()
+        cur.execute('''SELECT u.id,u.username,u.email,u.is_admin FROM sessions s
+                       JOIN users u ON u.id=s.user_id
+                       WHERE s.token=? AND s.expires_at > ?''', (token, now_iso()))
+        user = rowdict(cur.fetchone()); con.close(); return user
+
+    def require_user(self):
+        user = self.current_user()
+        if not user:
+            self.send_json({'error':'Login required'},401); return None
+        return user
+
+    def require_admin(self):
+        user = self.require_user()
+        if not user: return None
+        if not user.get('is_admin'):
+            self.send_json({'error':'Admin access required'},403); return None
+        return user
+
+    def do_GET(self):
+        try:
+            parsed = urlparse(self.path)
+            path = parsed.path
+            qs = parse_qs(parsed.query)
+            if path.startswith('/api/'):
+                return self.route_get(path, qs)
+            return self.serve_static(path)
+        except Exception as e:
+            self.send_json({'error':str(e)},500)
+
+    def do_POST(self):
+        try:
+            return self.route_post(urlparse(self.path).path, self.read_json())
+        except ValueError as e:
+            self.send_json({'error':str(e)},400)
+        except Exception as e:
+            self.send_json({'error':str(e)},500)
+
+    def do_PUT(self):
+        try:
+            return self.route_put(urlparse(self.path).path, self.read_json())
+        except ValueError as e:
+            self.send_json({'error':str(e)},400)
+        except Exception as e:
+            self.send_json({'error':str(e)},500)
+
+    def do_DELETE(self):
+        try:
+            return self.route_delete(urlparse(self.path).path)
+        except Exception as e:
+            self.send_json({'error':str(e)},500)
+
+    def serve_static(self, path):
+        if path == '/': path = '/index.html'
+        safe = os.path.normpath(path).lstrip(os.sep)
+        file_path = PUBLIC_DIR / safe
+        if not file_path.exists() or not file_path.is_file():
+            file_path = PUBLIC_DIR / 'index.html'
+        data = file_path.read_bytes()
+        ctype = mimetypes.guess_type(str(file_path))[0] or 'application/octet-stream'
+        self.send_response(200)
+        self.send_header('Content-Type', ctype)
+        self.send_header('Content-Length', str(len(data)))
+        self.end_headers(); self.wfile.write(data)
+
+    def route_get(self,path,qs):
+        user = None if path in ['/api/me','/api/items'] else self.require_user()
+        con = db(); cur = con.cursor()
+        if path == '/api/me':
+            u = self.current_user(); return self.send_json({'user':u})
+        if path == '/api/items':
+            category = qs.get('category',[None])[0]
+            if category:
+                cur.execute('SELECT * FROM items WHERE category=? ORDER BY category, rarity, name',(category,))
+            else:
+                cur.execute('SELECT * FROM items ORDER BY category, rarity, name')
+            rows = rowsdict(cur.fetchall()); con.close(); return self.send_json({'items':rows})
+        if not user: return
+        if path == '/api/goals':
+            cur.execute('SELECT * FROM goals WHERE user_id=? ORDER BY completed ASC, CASE priority WHEN "Main Goal" THEN 0 WHEN "High" THEN 1 WHEN "Medium" THEN 2 ELSE 3 END, deadline ASC', (user['id'],))
+            goals = rowsdict(cur.fetchall())
+            for g in goals:
+                cur.execute('SELECT amount,note,created_at FROM progress_history WHERE goal_id=? ORDER BY id DESC LIMIT 8',(g['id'],))
+                g['history'] = rowsdict(cur.fetchall())
+            con.close(); return self.send_json({'goals':goals})
+        if path == '/api/analytics':
+            cur.execute('SELECT * FROM goals WHERE user_id=?',(user['id'],)); goals=rowsdict(cur.fetchall())
+            active=[g for g in goals if not g['completed']]
+            completed=[g for g in goals if g['completed']]
+            total_needed=sum(max(0,int(g['target'])-int(g['current'])) for g in active)
+            closest=min(active, key=lambda g:max(0,int(g['target'])-int(g['current'])), default=None)
+            hardest=max(active, key=lambda g:daily_need(g), default=None)
+            con.close(); return self.send_json({'totalGoals':len(goals),'activeGoals':len(active),'completedGoals':len(completed),'totalNeeded':total_needed,'closestGoal':closest,'hardestGoal':hardest})
+        if path == '/api/rewards':
+            date = qs.get('date',[datetime.date.today().isoformat()])[0]
+            cur.execute('SELECT * FROM rewards WHERE user_id=? AND date=?',(user['id'],date)); r=rowdict(cur.fetchone())
+            con.close(); return self.send_json({'reward':r or {'date':date,'login_claimed':0,'ads_watched':0,'events_played':0,'tournament_done':0}})
+        if path == '/api/admin/users':
+            if not self.require_admin(): con.close(); return
+            cur.execute('SELECT id,username,email,is_admin,created_at FROM users ORDER BY id DESC'); rows=rowsdict(cur.fetchall()); con.close(); return self.send_json({'users':rows})
+        con.close(); self.send_json({'error':'Not found'},404)
+
+    def route_post(self,path,data):
+        con = db(); cur = con.cursor()
+        if path == '/api/signup':
+            username=(data.get('username') or '').strip()
+            email=(data.get('email') or '').strip().lower()
+            password=data.get('password') or ''
+            if not re.match(r'^[A-Za-z0-9_]{3,20}$', username): return self.send_json({'error':'Username must be 3-20 letters/numbers/underscore'},400)
+            if '@' not in email or len(password)<6: return self.send_json({'error':'Use valid email and password minimum 6 characters'},400)
+            try:
+                cur.execute('INSERT INTO users(username,email,password_hash,is_admin,created_at) VALUES(?,?,?,?,?)',(username,email,hash_password(password),0,now_iso()))
+                con.commit()
+            except sqlite3.IntegrityError:
+                return self.send_json({'error':'Username or email already exists'},409)
+            return self.login_response(cur.lastrowid, con)
+        if path == '/api/login':
+            username=(data.get('username') or '').strip()
+            password=data.get('password') or ''
+            cur.execute('SELECT * FROM users WHERE username=? OR email=?',(username,username.lower()))
+            u=cur.fetchone()
+            if not u or not verify_password(password,u['password_hash']):
+                return self.send_json({'error':'Wrong username or password'},401)
+            return self.login_response(u['id'], con)
+        if path == '/api/logout':
+            token = self.cookie_token()
+            if token: cur.execute('DELETE FROM sessions WHERE token=?',(token,)); con.commit()
+            return self.send_json({'ok':True}, cookie='aa_session=; Path=/; Max-Age=0; SameSite=Lax')
+        user = self.require_user()
+        if not user: con.close(); return
+        if path == '/api/goals':
+            item_id=data.get('item_id') or None
+            item_name=(data.get('item_name') or data.get('name') or 'Custom Goal').strip()
+            vals=(user['id'],item_id,item_name,data.get('category','Custom'),data.get('goal_type','Unlock Goal'),data.get('priority','Medium'),data.get('currency','A-Coins'),int(data.get('target') or 0),int(data.get('current') or 0),data.get('deadline') or None,now_iso(),now_iso())
+            if vals[7] <= 0: return self.send_json({'error':'Target amount is required'},400)
+            cur.execute('''INSERT INTO goals(user_id,item_id,item_name,category,goal_type,priority,currency,target,current,deadline,created_at,updated_at)
+                           VALUES(?,?,?,?,?,?,?,?,?,?,?,?)''', vals)
+            goal_id=cur.lastrowid
+            cur.execute('INSERT INTO progress_history(goal_id,amount,note,created_at) VALUES(?,?,?,?)',(goal_id,vals[8],'Goal created',now_iso()))
+            con.commit(); con.close(); return self.send_json({'ok':True,'id':goal_id})
+        if path == '/api/items':
+            if not self.require_admin(): con.close(); return
+            cur.execute('INSERT INTO items(name,category,rarity,currency,default_cost,source,updated_at) VALUES(?,?,?,?,?,?,?)',(
+                data.get('name','Custom Item').strip(),data.get('category','Mech'),data.get('rarity','Unknown'),data.get('currency','A-Coins'),data.get('default_cost'),data.get('source','Admin entry'),now_iso()))
+            con.commit(); con.close(); return self.send_json({'ok':True,'id':cur.lastrowid})
+        con.close(); self.send_json({'error':'Not found'},404)
+
+    def login_response(self,user_id,con):
+        token=secrets.token_urlsafe(32)
+        expires=(datetime.datetime.utcnow()+datetime.timedelta(days=SESSION_DAYS)).replace(microsecond=0).isoformat()+"Z"
+        cur=con.cursor(); cur.execute('INSERT INTO sessions(token,user_id,expires_at,created_at) VALUES(?,?,?,?)',(token,user_id,expires,now_iso())); con.commit()
+        cur.execute('SELECT id,username,email,is_admin FROM users WHERE id=?',(user_id,)); user=rowdict(cur.fetchone()); con.close()
+        return self.send_json({'ok':True,'user':user}, cookie=f'aa_session={token}; Path=/; Max-Age={SESSION_DAYS*86400}; HttpOnly; SameSite=Lax')
+
+    def route_put(self,path,data):
+        user = self.require_user()
+        if not user: return
+        con=db(); cur=con.cursor()
+        if path.startswith('/api/goals/'):
+            goal_id=int(path.split('/')[-1])
+            cur.execute('SELECT * FROM goals WHERE id=? AND user_id=?',(goal_id,user['id'])); old=rowdict(cur.fetchone())
+            if not old: con.close(); return self.send_json({'error':'Goal not found'},404)
+            fields=[]; vals=[]
+            for k in ['item_id','item_name','category','goal_type','priority','currency','target','current','deadline','completed','status']:
+                if k in data:
+                    fields.append(f'{k}=?'); vals.append(data[k])
+            fields.append('updated_at=?'); vals.append(now_iso()); vals += [goal_id,user['id']]
+            cur.execute(f'UPDATE goals SET {", ".join(fields)} WHERE id=? AND user_id=?', vals)
+            if 'current' in data and int(data['current']) != int(old['current']):
+                cur.execute('INSERT INTO progress_history(goal_id,amount,note,created_at) VALUES(?,?,?,?)',(goal_id,int(data['current']),'Progress updated',now_iso()))
+            if data.get('completed') in [1, True, '1', 'true']:
+                cur.execute('INSERT INTO progress_history(goal_id,amount,note,created_at) VALUES(?,?,?,?)',(goal_id,int(data.get('current') or old['current']),'Mission completed',now_iso()))
+            con.commit(); con.close(); return self.send_json({'ok':True})
+        if path == '/api/rewards':
+            d=data.get('date') or datetime.date.today().isoformat()
+            vals=(user['id'],d,int(bool(data.get('login_claimed'))),int(bool(data.get('ads_watched'))),int(bool(data.get('events_played'))),int(bool(data.get('tournament_done'))),now_iso())
+            cur.execute('''INSERT INTO rewards(user_id,date,login_claimed,ads_watched,events_played,tournament_done,updated_at)
+                           VALUES(?,?,?,?,?,?,?)
+                           ON CONFLICT(user_id,date) DO UPDATE SET login_claimed=excluded.login_claimed, ads_watched=excluded.ads_watched,
+                           events_played=excluded.events_played, tournament_done=excluded.tournament_done, updated_at=excluded.updated_at''', vals)
+            con.commit(); con.close(); return self.send_json({'ok':True})
+        if path.startswith('/api/items/'):
+            if not self.require_admin(): con.close(); return
+            item_id=int(path.split('/')[-1])
+            cur.execute('UPDATE items SET name=?,category=?,rarity=?,currency=?,default_cost=?,source=?,updated_at=? WHERE id=?',(
+                data.get('name'),data.get('category'),data.get('rarity'),data.get('currency'),data.get('default_cost'),data.get('source','Admin edited'),now_iso(),item_id))
+            con.commit(); con.close(); return self.send_json({'ok':True})
+        con.close(); self.send_json({'error':'Not found'},404)
+
+    def route_delete(self,path):
+        user = self.require_user()
+        if not user: return
+        con=db(); cur=con.cursor()
+        if path.startswith('/api/goals/'):
+            goal_id=int(path.split('/')[-1]); cur.execute('DELETE FROM goals WHERE id=? AND user_id=?',(goal_id,user['id'])); con.commit(); con.close(); return self.send_json({'ok':True})
+        if path.startswith('/api/items/'):
+            if not self.require_admin(): con.close(); return
+            item_id=int(path.split('/')[-1]); cur.execute('DELETE FROM items WHERE id=?',(item_id,)); con.commit(); con.close(); return self.send_json({'ok':True})
+        con.close(); self.send_json({'error':'Not found'},404)
+
+def daily_need(goal):
+    try:
+        target=int(goal['target']); current=int(goal['current']); remain=max(0,target-current)
+        d=goal.get('deadline')
+        if not d: return remain
+        days=(datetime.date.fromisoformat(d)-datetime.date.today()).days
+        return remain / max(1, days)
+    except Exception:
+        return 0
+
+if __name__ == '__main__':
+    init_db()
+    host='localhost'; port=8000
+    print('Advance Arena running at http://localhost:8000')
+    print('Default admin: username admin / password admin123')
+    ThreadingHTTPServer((host,port), Handler).serve_forever()
